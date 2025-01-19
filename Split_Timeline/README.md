@@ -124,13 +124,13 @@ in
 </details>
 
 ## T-SQL query
-[T-SQL](Spit_Timeline.sql)
+[T-SQL](Split_Timeline.sql)
 
 <details>
     <summary>Details</summary>
 
 #### 1. ShiftBoundaries_CTE
-Identify the boudaries of shifts for each event.
+Identify the boudaries of shifts for each event. The `ROW_NUMBER` function creates a unique ID for each row that is used in the following CTE.
 ```tsql
 WITH ShiftBoundaries_CTE as (
 SELECT
@@ -154,6 +154,64 @@ SELECT
 FROM 
 	Timeline
 )
+```
+#### 2. Recursive_CTE
+Split each event into individual shifts using a recursive CTE.
+```tsql
+, Recursive_CTE as (
+SELECT
+    *
+    , TotalShiftStart as ShiftStart
+FROM 
+    ShiftBoundaries_CTE
+UNION ALL
+SELECT
+    t.ID
+    , t.DEVICE_ID
+    , t.STATUS_ID
+    , t.tStart
+    , t.tEnd
+    , t.TotalShiftStart
+    , t.TotalShiftEnd
+    , DATEADD(hour, 8, Recursive_CTE.ShiftStart) as ShiftStart
+FROM 
+    ShiftBoundaries_CTE as t INNER JOIN Recursive_CTE
+        ON t.ID = Recursive_CTE.ID
+WHERE
+     DATEADD(hour, 8, Recursive_CTE.ShiftStart) < t.TotalShiftEnd
+)
+```
+#### 3. EventStartEnd_CTE
+Determine the Start and End datetimes for each event within a shift.
+```tsql
+, EventStartEnd_CTE as (
+SELECT 
+    *
+    , CASE WHEN tStart > ShiftStart THEN tStart ELSE ShiftStart END as [Start]
+    , CASE WHEN tEnd < DATEADD(hour, 8, ShiftStart) THEN tEnd ELSE DATEADD(hour, 8, ShiftStart) END as [End]
+FROM
+    Recursive_CTE
+)
+```
+#### 4. Final output table
+Create duration (hours), date, and shift number for each event.
+```tsql
+SELECT
+    DEVICE_ID
+    , STATUS_ID
+    , tStart
+    , tEnd
+    , TotalShiftStart
+    , TotalShiftEnd
+    , DATEDIFF(second, [Start], [End])/60.0/60.0 as Duration
+    , CAST(ShiftStart as date) as [Date]
+    , CASE
+        WHEN CAST(ShiftStart as time) = '06:00' THEN 1
+        WHEN CAST(ShiftStart as time) = '14:00' THEN 2
+        WHEN CAST(ShiftStart as time) = '22:00' THEN 3
+    END as [Shift]
+FROM
+    EventStartEnd_CTE
 ```
 </details>
 
