@@ -19,11 +19,11 @@ The Power BI report and Power Query M code demonstrates how to split time data i
 | 24            | 26            | 2023-02-15 05:07:23 | 2023-02-15 06:07:37 |
 | 24            | 07            | 2023-02-14 01:06:31 | 2023-02-14 07:16:27 |
     
-### Power Query M Code
-[Power Query M Code](/Power_Query_M_Code.txt)
+## Power Query M Code
+[Power Query M Code](Power_Query_M_Code.txt)
 
 <details>
-    <summary>Power Query M Code</summary>
+    <summary>Details</summary>
 
 #### 1. Load Data
 ```m
@@ -31,7 +31,7 @@ let
     Source = #"Device Status (Raw Data)",
 ```
 #### 2. Add Total Shift Start
-Identify the start of the first shift associated with this event.
+Identify the start of the first shift associated with each event.
 ```m
 #"Added TotalShiftStart" = Table.AddColumn(Source, "TotalShiftStart", each 
     let result =
@@ -47,7 +47,7 @@ Identify the start of the first shift associated with this event.
     ),
 ```
 #### 3. Add Total Shift End
-Identify the end of the last shift associated with this event.
+Identify the end of the last shift associated with each event.
 ```m
 #"Added TotalShiftEnd" = Table.AddColumn(#"Added TotalShiftStart", "TotalShiftEnd", each 
     let result =
@@ -65,7 +65,7 @@ Identify the end of the last shift associated with this event.
 #### 4. Split Data into 3 shifts
 This step creates a list for each row.
 ##### List.DateTimes syntax:
-```
+```m
 List.DateTimes(start as datetime, count as number, step as duration) as list
 ```
 ```m
@@ -120,6 +120,40 @@ Since each starts at 6am, a date column is created from the ShiftStart column. T
 ```
 in
     #"Added ShiftNumber"
+```
+</details>
+
+## T-SQL query
+[T-SQL](Spit_Timeline.sql)
+
+<details>
+    <summary>Details</summary>
+
+#### 1. ShiftBoundaries_CTE
+Identify the boudaries of shifts for each event.
+```tsql
+WITH ShiftBoundaries_CTE as (
+SELECT
+    ROW_NUMBER() OVER (ORDER BY DEVICE_ID, tStart) as ID 
+    , DEVICE_ID
+    , STATUS_ID
+    , tStart
+    , tEnd
+    , CASE
+        WHEN CAST(tStart as time) >= '06:00' AND CAST(tStart as time) < '14:00' THEN DATEADD(hour, 6, CAST(CAST(tStart as date) as datetime))
+        WHEN CAST(tStart as time) >= '14:00' AND CAST(tStart as time) < '22:00' THEN DATEADD(hour, 14, CAST(CAST(tStart as date) as datetime))
+        WHEN CAST(tStart as time) >= '22:00' THEN DATEADD(hour, 22, CAST(CAST(tStart as date) as datetime))
+        WHEN CAST(tStart as time) < '06:00' THEN DATEADD(hour, 22, CAST(CAST(tStart - 1 as date) as datetime))
+    END as TotalShiftStart
+    , CASE
+        WHEN CAST(tEnd as time) >= '06:00' AND CAST(tEnd as time) < '14:00' THEN DATEADD(hour, 14, CAST(CAST(tEnd as date) as datetime))
+        WHEN CAST(tEnd as time) >= '14:00' AND CAST(tEnd as time) < '22:00' THEN DATEADD(hour, 22, CAST(CAST(tEnd as date) as datetime))
+        WHEN CAST(tEnd as time) >= '22:00' THEN DATEADD(hour, 6, CAST(CAST(tEnd + 1 as date) as datetime))
+        WHEN CAST(tEnd as time) < '06:00' THEN DATEADD(hour, 6, CAST(CAST(tEnd as date) as datetime))
+    END as TotalShiftEnd
+FROM 
+	Timeline
+)
 ```
 </details>
 
