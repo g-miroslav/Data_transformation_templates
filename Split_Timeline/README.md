@@ -1,7 +1,7 @@
 ## Introduction
 The Power BI report and Power Query M code demonstrates how to split time data into days and shifts. In the example provided, the data is split into 3 shifts and each day starts at 6am. This ensures that data, such as duration between start and end times, is attributed accurately to each day and shift.
 
-## raw data
+## Data
 ### schema
 | Column        | Data type     |
 | ------------- | ------------- |
@@ -18,8 +18,12 @@ The Power BI report and Power Query M code demonstrates how to split time data i
 | 24            | 04            | 2023-02-14 07:16:27 | 2023-02-14 07:57:23 |
 | 24            | 26            | 2023-02-15 05:07:23 | 2023-02-15 06:07:37 |
 | 24            | 07            | 2023-02-14 01:06:31 | 2023-02-14 07:16:27 |
+    
+### Power Query M Code
+[Power Query M Code](/Power_Query_M_Code.txt)
 
-## Power Query M Code
+<details>
+    <summary>Power Query M Code</summary>
 
 #### 1. Load Data
 ```m
@@ -117,5 +121,7 @@ Since each starts at 6am, a date column is created from the ShiftStart column. T
 in
     #"Added ShiftNumber"
 ```
+</details>
+
 ### Credits
 **Antti Suanto** - `as Timeline` 1.5.1 custom visual for Power BI
