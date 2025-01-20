@@ -221,27 +221,64 @@ FROM
 <details>
     <summary>Details</summary>
 
-#### 1. ShiftBoundaries_CTE
-Identify the boudaries of shifts for each event. The `ROW_NUMBER` function creates a unique ID for each row that is used in the following CTE.
-```tsql
-
+Qlik Sense script was adapted from an answer by **Swuehl** in the Qlik Community forum - [Splitting the data - On the way to granularity](https://community.qlik.com/t5/QlikView-App-Dev/Splitting-the-data-On-the-way-to-granularity/td-p/468139)
+	
+#### 1. Load Data
+Identify the boudaries of shifts for each event.
 ```
-#### 2. Recursive_CTE
-Split each event into individual shifts using a recursive CTE.
-```tsql
-
+Input:
+LOAD
+    DEVICE_ID,
+    STATUS_ID,
+    tStart,
+    tEnd
+ FROM [lib://C/Sample Data.csv]
+(txt, codepage is 28591, embedded labels, delimiter is ',', msq);
 ```
-#### 3. EventStartEnd_CTE
+#### 2. Identify Shift boundaries
+Identify the boudaries of shifts for each event.
+```
+ShiftBoundaries:
+LOAD
+    *,
+    Timestamp(Floor(tStart, MakeTime(8), MakeTime(6))) as TotalShiftStart,
+    Timestamp(Floor(tEnd, MakeTime(8), MakeTime(6)) + MakeTime(8)) as TotalShiftEnd
+Resident Input;
+```
+#### 3. Split into 3 shifts
+`WHILE` statement is used to split events into 3 shifts.
+```
+LOAD
+    *,
+    Timestamp(TotalShiftStart + (IterNo() - 1) * MakeTime(8)) as ShiftStart,
+    Timestamp(TotalShiftStart + IterNo() * MakeTime(8)) as ShiftEnd
+Resident ShiftBoundaries
+WHILE TotalShiftStart + IterNo() * MakeTime(8) <= TotalShiftEnd;
+```
+#### 4. Start and End
 Determine the Start and End datetimes for each event within a shift.
-```tsql
-
 ```
-#### 4. Final output table
+LOAD
+    *,
+    If(tStart > ShiftStart, tStart, ShiftStart) as Start,
+    If(tEnd < ShiftEnd, tEnd, ShiftEnd) as End;
+```
+#### 5. Duration, Shift, Date
 Create duration (hours), date, and shift number for each event.
-```tsql
-
+```
+LOAD
+    *,
+    Interval(End - Start) * 24 as Duration,
+    Pick(Match(Time(Frac(ShiftStart)), MakeTime(6), MakeTime(14), MakeTime(22)), 1, 2, 3) as Shift,
+    Date(Floor(ShiftStart)) as Date;
+```
+#### 6. Remove redundant tables
+```
+DROP TABLE Input;
+DROP TABLE ShiftBoundaries;
 ```
 </details>
 
 ### Credits
-**Antti Suanto** - `as Timeline` 1.5.1 custom visual for Power BI
+1. **Antti Suanto** - `as Timeline` 1.5.1 custom visual for Power BI
+2. **Swuehl** - [Qlik Community - Splitting the data - On the way to granularity](https://community.qlik.com/t5/QlikView-App-Dev/Splitting-the-data-On-the-way-to-granularity/td-p/468139)
