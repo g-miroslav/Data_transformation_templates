@@ -215,5 +215,33 @@ FROM
 ```
 </details>
 
+## Qlik Sense script
+[Qlik Sense script](Qlik_Sense_script.txt)
+
+<details>
+    <summary>Details</summary>
+
+#### 1. ShiftBoundaries_CTE
+Identify the boudaries of shifts for each event. The `ROW_NUMBER` function creates a unique ID for each row that is used in the following CTE.
+```tsql
+
+```
+#### 2. Recursive_CTE
+Split each event into individual shifts using a recursive CTE.
+```tsql
+
+```
+#### 3. EventStartEnd_CTE
+Determine the Start and End datetimes for each event within a shift.
+```tsql
+
+```
+#### 4. Final output table
+Create duration (hours), date, and shift number for each event.
+```tsql
+
+```
+</details>
+
 ### Credits
 **Antti Suanto** - `as Timeline` 1.5.1 custom visual for Power BI
