@@ -280,5 +280,5 @@ DROP TABLE ShiftBoundaries;
 </details>
 
 ### Credits
-1. **Antti Suanto** - `as Timeline` 1.5.1 custom visual for Power BI
-2. **Swuehl** - [Qlik Community - Splitting the data - On the way to granularity](https://community.qlik.com/t5/QlikView-App-Dev/Splitting-the-data-On-the-way-to-granularity/td-p/468139)
+- **Antti Suanto** - `as Timeline` 1.5.1 custom visual for Power BI
+- **Swuehl** - [Qlik Community - Splitting the data - On the way to granularity](https://community.qlik.com/t5/QlikView-App-Dev/Splitting-the-data-On-the-way-to-granularity/td-p/468139)
