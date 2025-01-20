@@ -1,9 +1,9 @@
 Input:
 LOAD
-	DEVICE_ID,
-	STATUS_ID,
-	tStart,
-	tEnd
+    DEVICE_ID,
+    STATUS_ID,
+    tStart,
+    tEnd
  FROM [lib://C/Sample Data.csv]
 (txt, codepage is 28591, embedded labels, delimiter is ',', msq);
 
