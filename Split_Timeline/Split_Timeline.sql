@@ -68,4 +68,4 @@ SELECT
         WHEN CAST(ShiftStart as time) = '22:00' THEN 3
     END as [Shift]
 FROM
-    EventStartEnd_CTE
+    EventStartEnd_CTE;
