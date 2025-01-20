@@ -14,8 +14,6 @@ LOAD
     Timestamp(Floor(tEnd, MakeTime(8), MakeTime(6)) + MakeTime(8)) as TotalShiftEnd
 Resident Input;
 
-DROP TABLE Input;
-
 Split_Timeline:
 LOAD
     *,
@@ -35,4 +33,5 @@ LOAD
 Resident ShiftBoundaries
 WHILE TotalShiftStart + IterNo() * MakeTime(8) <= TotalShiftEnd;
 
+DROP TABLE Input;
 DROP TABLE ShiftBoundaries;
