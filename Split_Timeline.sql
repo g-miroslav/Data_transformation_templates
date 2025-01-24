@@ -60,6 +60,10 @@ SELECT
     , tEnd
     , TotalShiftStart
     , TotalShiftEnd
+    , ShiftStart
+    , DATEADD(hour, 8, ShiftStart) as ShiftEnd
+    , [Start]
+    , [End]
     , DATEDIFF(second, [Start], [End])/60.0/60.0 as Duration
     , CAST(ShiftStart as date) as [Date]
     , CASE
