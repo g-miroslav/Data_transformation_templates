@@ -34,7 +34,7 @@ The Power BI report and Power Query M code demonstrates how to split time data i
     
 ## Power Query M
 - [Power Query M code](Power_Query_M_Code.txt)
-- [Power BI report](link_to_Power_BI_report)
+- [Power BI report](Split_Timeline.pbix)
 
 <details>
 
