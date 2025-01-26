@@ -38,7 +38,8 @@ SELECT
     , t.TotalShiftEnd
     , DATEADD(hour, 8, Recursive_CTE.ShiftStart) as ShiftStart
 FROM 
-    ShiftBoundaries_CTE as t INNER JOIN Recursive_CTE
+    ShiftBoundaries_CTE as t 
+    INNER JOIN Recursive_CTE
         ON t.ID = Recursive_CTE.ID
 WHERE
      DATEADD(hour, 8, Recursive_CTE.ShiftStart) < t.TotalShiftEnd
